@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101827">
+    <title>CyberLab | Security Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="/">Cyber<span>Lab</span></a>
+        <span class="status"><i></i> Educational Lab</span>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <p class="eyebrow">CYBERSECURITY / WEB LAB</p>
+            <h1>Understand your <span>connection.</span></h1>
+            <p class="intro">
+                Explore browser information, test an HTTP request,
+                and learn how location permissions work.
+            </p>
+        </section>
+
+        <section class="card">
+            <div class="card-heading">
+                <span class="number">01</span>
+                <div>
+                    <h2>Browser information</h2>
+                    <p>Basic details available to this page.</p>
+                </div>
+            </div>
+            <div class="info-row">
+                <span>Language</span>
+                <strong id="language">Loading...</strong>
+            </div>
+            <div class="info-row">
+                <span>Platform</span>
+                <strong id="platform">Loading...</strong>
+            </div>
+            <div class="info-row">
+                <span>Connection</span>
+                <strong id="connection">Loading...</strong>
+            </div>
+            <div class="info-row">
+                <span>Browser identification</span>
+                <code id="browser">Loading...</code>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-heading">
+                <span class="number">02</span>
+                <div>
+                    <h2>HTTP connection test</h2>
+                    <p>Send a request to a public demo API.</p>
+                </div>
+            </div>
+            <button id="testButton" class="button primary">
+                Test connection
+            </button>
+            <pre id="httpResult" class="result">Ready to test.</pre>
+        </section>
+
+        <section class="card">
+            <div class="card-heading">
+                <span class="number">03</span>
+                <div>
+                    <h2>Location permissions</h2>
+                    <p>Your browser will ask for permission first.</p>
+                </div>
+            </div>
+            <button id="locationButton" class="button secondary">
+                Request my location
+            </button>
+            <pre id="locationResult" class="result">Location not requested.</pre>
+            <p class="privacy">
+                Your coordinates are displayed on this page only.
+                This demo does not send them to the server.
+            </p>
+        </section>
+
+        <footer>
+            CyberLab · Educational use · Privacy first
+        </footer>
+    </main>
+
+    <script>
+        const $ = id => document.getElementById(id);
+
+        $("language").textContent = navigator.language || "Unavailable";
+        $("platform").textContent = navigator.userAgentData
+            ? navigator.userAgentData.platform
+            : "Not disclosed by browser";
+        $("connection").textContent = navigator.onLine
+            ? "Browser reports online"
+            : "Browser reports offline";
+        $("browser").textContent = navigator.userAgent;
+
+        $("testButton").addEventListener("click", async () => {
+            const output = $("httpResult");
+            $("testButton").disabled = true;
+            output.textContent = "Sending request...";
+
+            try {
+                const response = await fetch(
+                    "https://jsonplaceholder.typicode.com/todos/1"
+                );
+                const body = await response.json();
+
+                output.textContent =
+                    "HTTP status: " + response.status +
+                    "\nResponse:\n" + JSON.stringify(body, null, 2);
+            } catch (error) {
+                output.textContent =
+                    "Request failed. Check your connection.";
+            } finally {
+                $("testButton").disabled = false;
+            }
+        });
+
+        $("locationButton").addEventListener("click", () => {
+            const output = $("locationResult");
+
+            if (!navigator.geolocation) {
+                output.textContent =
+                    "Geolocation is not supported by this browser.";
+                return;
+            }
+
+            output.textContent = "Waiting for permission...";
+
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    output.textContent =
+                        "Latitude: " +
+                        position.coords.latitude +
+                        "\nLongitude: " +
+                        position.coords.longitude +
+                        "\nAccuracy: approximately " +
+                        Math.round(position.coords.accuracy) + " meters";
+                },
+                error => {
+                    output.textContent =
+                        "Location unavailable: " + error.message;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+FROM eclipse-mosquitto:21-jdk
+
+WORKDIR /app
+
+COPY SecurityLab.java index.html style.css ./
+
+RUN javac --add-modules jdk.httpserver SecurityLab.java
+
+ENV PORT=8080
+
+EXPOSE 8080
+
+CMD ["java", "--add-modules", "jdk.httpserver", "SecurityLab"]
